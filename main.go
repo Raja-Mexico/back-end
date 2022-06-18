@@ -16,7 +16,8 @@ func main() {
 	}
 
 	userRepository := repository.NewUserRepository(db)
+	financialRepository := repository.NewFinancialRepository(db)
 
-	mainAPI := api.NewAPI(userRepository)
+	mainAPI := api.NewAPI(userRepository, financialRepository)
 	mainAPI.Start()
 }

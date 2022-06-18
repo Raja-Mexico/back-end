@@ -19,3 +19,35 @@ type SuccessResponse struct {
 type ErrorResponse struct {
 	Message string `json:"error"`
 }
+
+type CredentialsFinancialAccount struct {
+	BankID      string `json:"bankId" binding:"required"`
+	AccessToken string `json:"accessToken" binding:"required"`
+	UserID      string `json:"userId" binding:"required"`
+}
+
+type DataTransaction struct {
+	Data []transaction `json:"data"`
+}
+
+type transaction struct {
+	Direction           string              `json:"direction" binding:"required"`
+	Amount              float64             `json:"amount" binding:"required"`
+	TransactionCategory transactionCategory `json:"category" binding:"required"`
+}
+
+type transactionCategory struct {
+	Name string `json:"classification_group" binding:"required"`
+}
+
+type CategorizeTransactionResponse struct {
+	TotalExpense        float64                       `json:"total_expense"`
+	TransactionCategory []TransactionCategoryResponse `json:"expenses"`
+	TopExpense          []TransactionCategoryResponse `json:"top_expenses"`
+}
+
+type TransactionCategoryResponse struct {
+	Name         string  `json:"name"`
+	TotalExpense float64 `json:"total_expense"`
+	Percentage   string  `json:"percentage"`
+}

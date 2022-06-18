@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -82,4 +83,27 @@ func (api *API) generateJWT(userId int) (string, error) {
 
 	tokenString, err := token.SignedString(jwtKey)
 	return tokenString, err
+}
+
+func (api *API) getUserIDFromToken(c *gin.Context) (int, error) {
+	tokenString := c.GetHeader("Authorization")
+	if tokenString == "" {
+		return 0, fmt.Errorf("token not found")
+	}
+
+	claims := &Claims{}
+	tokenString = tokenString[len("Bearer "):]
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	if !token.Valid {
+		return 0, err
+	}
+
+	return claims.Id, nil
 }
