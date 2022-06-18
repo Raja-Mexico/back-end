@@ -53,7 +53,7 @@ type CategorizeTransactionResponse struct {
 	TotalExpense        float64                       `json:"total_expense"`
 	TransactionCategory []TransactionCategoryResponse `json:"expenses"`
 	TopExpense          []TransactionCategoryResponse `json:"top_expenses"`
-	Institution         []string                      `json:"institution"`
+	Institution         []string                      `json:"institutions"`
 }
 
 type TransactionCategoryResponse struct {
