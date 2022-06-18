@@ -37,9 +37,9 @@ func migrate(db *sql.DB) {
 		CREATE TABLE IF NOT EXISTS team (	
 			id VARCHAR(255) PRIMARY KEY,
 			creator_id INTEGER not null,
-			balance BIGINT not null,
-			prepaid_balance BIGINT not null,
-			name VARCHAR(255),
+			balance FLOAT not null default 0,
+			prepaid_balance FLOAT not null default 0,
+			name VARCHAR(255) null,
 			FOREIGN KEY (creator_id) REFERENCES users(id)
 		);
 
@@ -47,16 +47,17 @@ func migrate(db *sql.DB) {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER not null,
 			team_id VARCHAR(255) not null,
-			is_admin BOOLEAN not null,
+			is_admin BOOLEAN not null default true,
 			FOREIGN KEY (user_id) REFERENCES users(id),
 			FOREIGN KEY (team_id) REFERENCES team(id)
 		);
 
 		CREATE TABLE IF NOT EXISTS user_balance (
-			id VARCHAR(255) PRIMARY KEY,
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER not null,
 			team_id INTEGER not null,
-			balance BIGINT NOT NULL,
+			balance FLOAT NOT NULL DEFAULT 0,
+			no_virtual_account VARCHAR(255) NOT NULL,
 			FOREIGN KEY(user_id) REFERENCES users(id),
 			FOREIGN KEY(team_id) REFERENCES team(id)
 		);

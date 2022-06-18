@@ -6,12 +6,20 @@ import (
 	"unicode"
 
 	"github.com/Raja-Mexico/back-end/internal/constant"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 const (
 	EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
 )
+
+type UserInfo struct {
+	Name             string  `db:"name"`
+	Balance          float64 `db:"balance"`
+	NoVirtualAccount string  `db:"no_virtual_account"`
+	IsInFamily       bool
+}
 
 type UserRepository struct {
 	db *sql.DB
@@ -64,6 +72,55 @@ func (u *UserRepository) InsertNewUser(name, email, password string) (int, error
 	}
 
 	return int(userID), nil
+}
+
+func (u *UserRepository) InjectUserNeedsAfterRegister(userID int) error {
+	teamID := uuid.New().String()
+
+	statement := `INSERT INTO team (id, creator_id) VALUES (?, ?);`
+	_, err := u.db.Exec(statement, teamID, userID)
+	if err != nil {
+		return err
+	}
+
+	statement = `INSERT INTO membership (team_id, user_id) VALUES (?, ?);`
+	_, err = u.db.Exec(statement, teamID, userID)
+	if err != nil {
+		return err
+	}
+
+	statement = `INSERT INTO user_balance (team_id, user_id, no_virtual_account) VALUES (?, ?, ?);`
+	no_virtual_account := "130432138889902"
+	_, err = u.db.Exec(statement, teamID, userID, no_virtual_account)
+	return err
+}
+
+func (u *UserRepository) GetUserInfo(userID int) (UserInfo, error) {
+	statement := `
+	SELECT name, balance, no_virtual_account 
+	FROM users 
+	JOIN user_balance ON users.id = user_balance.user_id
+	WHERE users.id = ?;`
+
+	row := u.db.QueryRow(statement, userID)
+	var userInfo UserInfo
+	err := row.Scan(&userInfo.Name, &userInfo.Balance, &userInfo.NoVirtualAccount)
+	if err != nil {
+		return UserInfo{}, err
+	}
+
+	statement = `SELECT name FROM team WHERE creator_id = ?;`
+	row = u.db.QueryRow(statement, userID)
+	var teamName string
+	err = row.Scan(&teamName)
+
+	if err != nil {
+		userInfo.IsInFamily = false
+	} else {
+		userInfo.IsInFamily = true
+	}
+
+	return userInfo, nil
 }
 
 func (u *UserRepository) CheckUserByEmailAndPassword(email, password string) (int, error) {

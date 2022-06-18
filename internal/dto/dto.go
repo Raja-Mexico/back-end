@@ -51,3 +51,10 @@ type TransactionCategoryResponse struct {
 	TotalExpense float64 `json:"total_expense"`
 	Percentage   string  `json:"percentage"`
 }
+
+type UserInfoResponse struct {
+	Name               string  `json:"name"`
+	Balance            float64 `json:"balance"`
+	VirtualAccountCode string  `json:"virtual_account_code"`
+	IsInFamily         bool    `json:"is_in_family"`
+}

@@ -8,12 +8,14 @@ import (
 type API struct {
 	userRepo      *repository.UserRepository
 	financialRepo *repository.FinancialRepository
+	teamRepo      *repository.TeamRepository
 	router        *gin.Engine
 }
 
 func NewAPI(
 	userRepo *repository.UserRepository,
 	financialRepo *repository.FinancialRepository,
+	teamRepo *repository.TeamRepository,
 ) *API {
 	router := gin.Default()
 
@@ -21,6 +23,7 @@ func NewAPI(
 		router:        router,
 		financialRepo: financialRepo,
 		userRepo:      userRepo,
+		teamRepo:      teamRepo,
 	}
 
 	router.POST("/api/register", api.register)
@@ -32,6 +35,7 @@ func NewAPI(
 		authMiddleware,
 	)
 	{
+		router.GET("/api/user-info", api.getUserInfo)
 		routerBrick := router.Group("/api/brick")
 		{
 			routerBrick.GET("/", api.getBrick)

@@ -37,6 +37,12 @@ func (api *API) register(c *gin.Context) {
 		return
 	}
 
+	err = api.userRepo.InjectUserNeedsAfterRegister(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Message: "User created successfully",
 		Token:   tokenString,
