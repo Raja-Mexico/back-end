@@ -68,3 +68,12 @@ type UserInfoResponse struct {
 	VirtualAccountCode string  `json:"virtual_account_code"`
 	IsInFamily         bool    `json:"is_in_family"`
 }
+
+type CreateTeamRequest struct {
+	Name string `json:"family_name" binding:"required"`
+}
+
+type CreateTeamResponse struct {
+	Message    string `json:"message"`
+	FamilyCode string `json:"family_code"`
+}
