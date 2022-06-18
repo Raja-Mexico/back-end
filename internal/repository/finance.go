@@ -41,3 +41,27 @@ func (f *FinancialRepository) GetAccessTokenByUserID(userID int) ([]string, erro
 
 	return accessTokens, nil
 }
+
+func (f *FinancialRepository) GetUserFinanceBank(userID int) ([]int, error) {
+	statement := `SELECT bank_id FROM financial_account WHERE user_id = ?;`
+
+	rows, err := f.db.Query(statement, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var banksID []int
+
+	for rows.Next() {
+		var bankID int
+		err := rows.Scan(&bankID)
+		if err != nil {
+			return nil, err
+		}
+
+		banksID = append(banksID, bankID)
+	}
+
+	return banksID, nil
+}

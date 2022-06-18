@@ -30,10 +30,19 @@ type DataTransaction struct {
 	Data []transaction `json:"data"`
 }
 
+type InstitutionListResponse struct {
+	Data []institution `json:"data"`
+}
+
 type transaction struct {
 	Direction           string              `json:"direction" binding:"required"`
 	Amount              float64             `json:"amount" binding:"required"`
 	TransactionCategory transactionCategory `json:"category" binding:"required"`
+}
+
+type institution struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 type transactionCategory struct {
@@ -44,6 +53,7 @@ type CategorizeTransactionResponse struct {
 	TotalExpense        float64                       `json:"total_expense"`
 	TransactionCategory []TransactionCategoryResponse `json:"expenses"`
 	TopExpense          []TransactionCategoryResponse `json:"top_expenses"`
+	Institution         []string                      `json:"institution"`
 }
 
 type TransactionCategoryResponse struct {

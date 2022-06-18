@@ -72,6 +72,28 @@ func (api *API) categorizeTransaction(c *gin.Context) {
 		return
 	}
 
+	banksID, err := api.financialRepo.GetUserFinanceBank(userID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	institutions, err := api.processInstitutionList()
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	institutionsMap := make(map[int]string)
+	for _, institution := range institutions.Data {
+		institutionsMap[institution.Id] = institution.Name
+	}
+
+	userBanks := make([]string, 0, len(banksID))
+	for _, bankID := range banksID {
+		userBanks = append(userBanks, institutionsMap[bankID])
+	}
+
 	accessTokens, err := api.financialRepo.GetAccessTokenByUserID(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
@@ -130,7 +152,7 @@ func (api *API) categorizeTransaction(c *gin.Context) {
 	top_expense, total := processData(transactionCategory)
 
 	var response dto.CategorizeTransactionResponse
-
+	response.Institution = userBanks
 	response.TotalExpense = total
 	for key, value := range transactionCategory {
 		response.TransactionCategory = append(response.TransactionCategory, dto.TransactionCategoryResponse{
@@ -148,6 +170,44 @@ func (api *API) categorizeTransaction(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+func (api *API) processInstitutionList() (dto.InstitutionListResponse, error) {
+	var institutions dto.InstitutionListResponse
+
+	url := "https://sandbox.onebrick.io/v1/institution/list"
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		log.Println(err)
+		return institutions, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println(err)
+		return institutions, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		log.Println(resp.StatusCode)
+		return institutions, err
+	}
+
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Print(err.Error())
+		return institutions, err
+	}
+
+	json.Unmarshal(bodyBytes, &institutions)
+
+	return institutions, nil
 }
 
 func processData(data map[string]float64) ([]string, float64) {
