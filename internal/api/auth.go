@@ -10,8 +10,7 @@ import (
 )
 
 type Claims struct {
-	Id    int
-	Email string
+	Id int
 	jwt.StandardClaims
 }
 
