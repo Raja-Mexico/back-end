@@ -31,7 +31,7 @@ func (api *API) createTeam(c *gin.Context) {
 }
 
 func (api *API) joinTeam(c *gin.Context) {
-	var req dto.JoinTeamRequest
+	var req dto.JoinDetailTeamRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
@@ -40,12 +40,12 @@ func (api *API) joinTeam(c *gin.Context) {
 
 	isTeamExist, err := api.teamRepo.CheckTeamExists(req.FamilyCode)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
 		return
 	}
 
 	if !isTeamExist {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: "Team does not exist"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Message: "Team does not exist"})
 		return
 	}
 
@@ -61,4 +61,55 @@ func (api *API) joinTeam(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dto.JoinTeamResponse{Success: true})
+}
+
+func (api *API) getDetailTeam(c *gin.Context) {
+	teamID := c.Param("id")
+	if teamID == "" {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: "Family code is required"})
+		return
+	}
+
+	isTeamExist, err := api.teamRepo.CheckTeamExists(teamID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	if !isTeamExist {
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Message: "Team does not exist"})
+		return
+	}
+
+	members, err := api.teamRepo.GetMembers(teamID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	familyBalance, err := api.teamRepo.GetTeamBalance(teamID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	senderUserID, err := api.getUserIDFromToken(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	var response dto.DetailTeamResponse
+	response.FamilyCode = teamID
+	response.FamilyBalance = familyBalance
+	for _, member := range members {
+		response.Members = append(response.Members, dto.TeamMemberResponse{
+			Name:     member.Name,
+			Balance:  member.Balance,
+			IsAdmin:  member.IsAdmin,
+			IsSender: member.ID == senderUserID,
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
 }

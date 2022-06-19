@@ -78,10 +78,23 @@ type CreateTeamResponse struct {
 	FamilyCode string `json:"family_code"`
 }
 
-type JoinTeamRequest struct {
+type JoinDetailTeamRequest struct {
 	FamilyCode string `json:"family_code" binding:"required"`
 }
 
 type JoinTeamResponse struct {
 	Success bool `json:"success"`
+}
+
+type DetailTeamResponse struct {
+	FamilyCode    string               `json:"family_code"`
+	FamilyBalance float64              `json:"family_balance"`
+	Members       []TeamMemberResponse `json:"members"`
+}
+
+type TeamMemberResponse struct {
+	Name     string  `json:"name"`
+	Balance  float64 `json:"balance"`
+	IsAdmin  bool    `json:"is_admin"`
+	IsSender bool    `json:"is_sender"`
 }
