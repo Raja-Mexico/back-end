@@ -1,5 +1,9 @@
 package dto
 
+type SimpleResponse struct {
+	Message string `json:"message"`
+}
+
 type RegisterRequest struct {
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required"`
@@ -112,4 +116,11 @@ type Expense struct {
 	Date     string  `json:"date"`
 	Category string  `json:"category"`
 	Amount   float64 `json:"amount"`
+}
+
+type CreatePrepaidRequest struct {
+	ServiceID      int     `json:"service_id" binding:"required"`
+	DeadlineDay    int     `json:"deadline_day" binding:"required"`
+	IdentityNumber string  `json:"identity_number" binding:"required"`
+	Amount         float64 `json:"amount" binding:"required"`
 }

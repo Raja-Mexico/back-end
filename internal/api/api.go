@@ -9,6 +9,7 @@ type API struct {
 	userRepo      *repository.UserRepository
 	financialRepo *repository.FinancialRepository
 	teamRepo      *repository.TeamRepository
+	prepaidRepo   *repository.PrepaidRepository
 	router        *gin.Engine
 }
 
@@ -16,6 +17,7 @@ func NewAPI(
 	userRepo *repository.UserRepository,
 	financialRepo *repository.FinancialRepository,
 	teamRepo *repository.TeamRepository,
+	prepaidRepo *repository.PrepaidRepository,
 ) *API {
 	router := gin.Default()
 
@@ -24,6 +26,7 @@ func NewAPI(
 		financialRepo: financialRepo,
 		userRepo:      userRepo,
 		teamRepo:      teamRepo,
+		prepaidRepo:   prepaidRepo,
 	}
 
 	router.POST("/api/register", api.register)
@@ -43,6 +46,11 @@ func NewAPI(
 			routerTeam.POST("/", api.createTeam)
 			routerTeam.POST("/join", api.joinTeam)
 			routerTeam.GET("/expenses", api.getTeamExpenses)
+		}
+
+		routerPrepaid := router.Group("/api/prepaid")
+		{
+			routerPrepaid.POST("/", api.savePrepaidCard)
 		}
 
 		routerBrick := router.Group("/api/brick")

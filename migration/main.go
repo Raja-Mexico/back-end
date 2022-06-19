@@ -87,15 +87,14 @@ func migrate(db *sql.DB) {
 		CREATE TABLE IF NOT EXISTS prepaid_card (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			creator_id INTEGER not null,
-			service_id INTEGER not null,
+			service_id SMALLINT not null,
 			team_id varchar(255) not null,
-			user_involved_id INTEGER not null,
-			title VARCHAR(255) not null,
-			automatically_day INTEGER not null,
+			user_involved_id INTEGER null,
+			deadline_day INTEGER not null,
 			is_automated BOOLEAN not null default false,
-			nominal BIGINT not null,
-			destination_number INTEGER not null,
-			status_id SMALLINT not null,
+			nominal FLOAT not null,
+			destination_number VARCHAR(255) not null,
+			status_id SMALLINT not null default 1,
 			FOREIGN KEY(creator_id) REFERENCES users(id),
 			FOREIGN KEY(service_id) REFERENCES service(id),
 			FOREIGN KEY(team_id) REFERENCES team(id),
@@ -121,14 +120,14 @@ func migrate(db *sql.DB) {
 func seed(db *sql.DB) {
 	_, err := db.Exec(`
 		INSERT INTO service (id, name) VALUES 
-		(0, 'PLN'),
-		(1, 'Pulsa');
+		(1, 'PLN'),
+		(2, 'Pulsa');
 
 		INSERT INTO status (id, name) VALUES
-		(0, 'Menunggu Pembayaran'),
-		(1, 'Sudah Dibayar'),
-		(2, 'Menunggu Persetujuan Pembayaran Bersama'),
-		(3, 'Menunggu Konfirmasi (withdraw)');
+		(1, 'Menunggu Pembayaran'),
+		(2, 'Sudah Dibayar'),
+		(3, 'Menunggu Persetujuan Pembayaran Bersama'),
+		(4, 'Menunggu Konfirmasi (withdraw)');
 	`)
 
 	if err != nil {
