@@ -42,6 +42,7 @@ func NewAPI(
 			routerTeam.GET("/", api.getDetailTeam)
 			routerTeam.POST("/", api.createTeam)
 			routerTeam.POST("/join", api.joinTeam)
+			routerTeam.GET("/expenses", api.getTeamExpenses)
 		}
 
 		routerBrick := router.Group("/api/brick")

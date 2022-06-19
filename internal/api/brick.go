@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Raja-Mexico/back-end/internal/dto"
@@ -16,7 +17,7 @@ import (
 
 var (
 	accessToken = "public-sandbox-b7ed9e30-8109-4c4b-a895-8596bec10192"
-	redirectUrl = "https://ce49-180-252-172-19.ap.ngrok.io/api/brick"
+	redirectUrl = "https://e647-180-252-172-19.ap.ngrok.io/api/brick"
 )
 
 func (api *API) getBrick(c *gin.Context) {
@@ -208,6 +209,107 @@ func (api *API) processInstitutionList() (dto.InstitutionListResponse, error) {
 	json.Unmarshal(bodyBytes, &institutions)
 
 	return institutions, nil
+}
+
+func (api *API) getTeamExpenses(c *gin.Context) {
+	userID, err := api.getUserIDFromToken(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	teamID, err := api.teamRepo.GetTeamByUserID(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	members, err := api.teamRepo.GetMembers(teamID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	accessTokenAuthor := make([]string, 0)
+	accessTokensAllMember := make([]string, 0)
+	for _, member := range members {
+		accessTokens, err := api.financialRepo.GetAccessTokenByUserID(member.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+			return
+		}
+
+		memberName, err := api.userRepo.GetName(member.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+			return
+		}
+
+		accessTokensAllMember = append(accessTokensAllMember, accessTokens...)
+		accessTokenAuthor = append(accessTokenAuthor, memberName)
+	}
+
+	now := time.Now().Format("2006-01-02")
+	yearAgo := time.Now().AddDate(-1, 0, 0).Format("2006-01-02")
+	url := fmt.Sprintf("https://sandbox.onebrick.io/v1/transaction/list?from=%s&to=%s", yearAgo, now)
+
+	var teamExpenses = make([]dto.Expense, 0)
+	for i, accessToken := range accessTokensAllMember {
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+			return
+		}
+
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+			return
+		}
+
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			log.Println(resp.StatusCode)
+			continue
+		}
+
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Print(err.Error())
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+			return
+		}
+
+		var responseObject dto.DataTransaction
+		json.Unmarshal(bodyBytes, &responseObject)
+
+		for _, data := range responseObject.Data {
+			if data.Direction == "out" {
+				desc := data.Description
+				slashnIdx := strings.Index(desc, "\n")
+				if slashnIdx != -1 {
+					desc = desc[:slashnIdx]
+				}
+
+				teamExpenses = append(teamExpenses, dto.Expense{
+					Spender:  accessTokenAuthor[i],
+					Desc:     desc,
+					Date:     data.Date,
+					Category: data.TransactionCategory.Name,
+					Amount:   data.Amount,
+				})
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, dto.TeamExpenseResponse{Expenses: teamExpenses})
+
 }
 
 func processData(data map[string]float64) ([]string, float64) {

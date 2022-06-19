@@ -123,6 +123,14 @@ func (u *UserRepository) GetUserInfo(userID int) (UserInfo, error) {
 	return userInfo, nil
 }
 
+func (u *UserRepository) GetName(userID int) (string, error) {
+	statement := `SELECT name FROM users WHERE id = ?;`
+	row := u.db.QueryRow(statement, userID)
+	var name string
+	err := row.Scan(&name)
+	return name, err
+}
+
 func (u *UserRepository) CheckUserByEmailAndPassword(email, password string) (int, error) {
 	isEmailExist, err := u.isEmailExist(email)
 	if err != nil {

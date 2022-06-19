@@ -35,6 +35,8 @@ type InstitutionListResponse struct {
 }
 
 type transaction struct {
+	Description         string              `json:"description"`
+	Date                string              `json:"date"`
 	Direction           string              `json:"direction" binding:"required"`
 	Amount              float64             `json:"amount" binding:"required"`
 	TransactionCategory transactionCategory `json:"category" binding:"required"`
@@ -97,4 +99,16 @@ type TeamMemberResponse struct {
 	Balance  float64 `json:"balance"`
 	IsAdmin  bool    `json:"is_admin"`
 	IsSender bool    `json:"is_sender"`
+}
+
+type TeamExpenseResponse struct {
+	Expenses []Expense
+}
+
+type Expense struct {
+	Spender  string  `json:"spender"`
+	Desc     string  `json:"desc"`
+	Date     string  `json:"date"`
+	Category string  `json:"category"`
+	Amount   float64 `json:"amount"`
 }
