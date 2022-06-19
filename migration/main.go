@@ -47,7 +47,7 @@ func migrate(db *sql.DB) {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER not null,
 			team_id VARCHAR(255) not null,
-			is_admin BOOLEAN not null,
+			is_admin BOOLEAN not null default true,
 			FOREIGN KEY (user_id) REFERENCES users(id),
 			FOREIGN KEY (team_id) REFERENCES team(id)
 		);
