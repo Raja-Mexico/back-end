@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	accessToken = "public-sandbox-b7ed9e30-8109-4c4b-a895-8596bec10192"
-	redirectUrl = "https://e647-180-252-172-19.ap.ngrok.io/api/brick"
+	accessToken = "public-sandbox-e8410755-4cfa-43e6-afe0-85389019a135"
+	redirectUrl = "https://05bf-180-252-172-19.ap.ngrok.io/api/brick"
 )
 
 func (api *API) getBrick(c *gin.Context) {
@@ -246,7 +246,9 @@ func (api *API) getTeamExpenses(c *gin.Context) {
 		}
 
 		accessTokensAllMember = append(accessTokensAllMember, accessTokens...)
-		accessTokenAuthor = append(accessTokenAuthor, memberName)
+		for range accessTokensAllMember {
+			accessTokenAuthor = append(accessTokenAuthor, memberName)
+		}
 	}
 
 	now := time.Now().Format("2006-01-02")
