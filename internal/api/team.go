@@ -64,20 +64,15 @@ func (api *API) joinTeam(c *gin.Context) {
 }
 
 func (api *API) getDetailTeam(c *gin.Context) {
-	teamID := c.Param("id")
-	if teamID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: "Family code is required"})
+	senderUserID, err := api.getUserIDFromToken(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
 		return
 	}
 
-	isTeamExist, err := api.teamRepo.CheckTeamExists(teamID)
+	teamID, err := api.teamRepo.GetTeamByUserID(senderUserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
-		return
-	}
-
-	if !isTeamExist {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Message: "Team does not exist"})
 		return
 	}
 
@@ -90,12 +85,6 @@ func (api *API) getDetailTeam(c *gin.Context) {
 	familyBalance, err := api.teamRepo.GetTeamBalance(teamID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
-		return
-	}
-
-	senderUserID, err := api.getUserIDFromToken(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
 		return
 	}
 

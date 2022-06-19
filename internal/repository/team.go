@@ -163,6 +163,18 @@ func (t *TeamRepository) GetMembers(teamID string) ([]TeamMember, error) {
 	return members, nil
 }
 
+func (t *TeamRepository) GetTeamByUserID(userID int) (string, error) {
+	statement := `SELECT team_id FROM membership WHERE user_id = ?;`
+
+	var teamID string
+	err := t.db.QueryRow(statement, userID).Scan(&teamID)
+	if err != nil {
+		return "", err
+	}
+
+	return teamID, nil
+}
+
 func (t *TeamRepository) GetTeamBalance(teamID string) (float64, error) {
 	statement := `SELECT balance FROM team WHERE id = ?;`
 
