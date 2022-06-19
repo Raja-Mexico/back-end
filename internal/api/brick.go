@@ -246,7 +246,7 @@ func (api *API) getTeamExpenses(c *gin.Context) {
 		}
 
 		accessTokensAllMember = append(accessTokensAllMember, accessTokens...)
-		for range accessTokensAllMember {
+		for range accessTokens {
 			accessTokenAuthor = append(accessTokenAuthor, memberName)
 		}
 	}
