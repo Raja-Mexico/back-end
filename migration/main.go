@@ -89,7 +89,6 @@ func migrate(db *sql.DB) {
 			creator_id INTEGER not null,
 			service_id SMALLINT not null,
 			team_id varchar(255) not null,
-			user_involved_id INTEGER null,
 			deadline_day INTEGER not null,
 			is_automated BOOLEAN not null default false,
 			nominal FLOAT not null,
@@ -107,6 +106,7 @@ func migrate(db *sql.DB) {
 			prepaid_card_id INTEGER not null,
 			user_id INTEGER not null,
 			is_confirmated BOOLEAN not null default false,
+			pay_request float not null,
 			FOREIGN KEY(prepaid_card_id) REFERENCES prepaid_card(id),
 			FOREIGN KEY(user_id) REFERENCES users(id)
 		);

@@ -81,3 +81,54 @@ func (api *API) updatePrepaidCard(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.SimpleResponse{Message: "Prepaid card updated successfully"})
 }
+
+func (api *API) payPrepaidCard(c *gin.Context) {
+	var req dto.PayPrepaidRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	userID, err := api.getUserIDFromToken(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	teamID, err := api.teamRepo.GetTeamByUserID(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	userInfo, err := api.userRepo.GetUserInfo(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	if len(req.MembersInvolved) == 0 {
+		if userInfo.Balance < req.Amount {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: "Insufficient balance"})
+			return
+		}
+
+		if err := api.prepaidRepo.PayPrepaidByID(req.ID, userID, teamID, req.IdentityNumber, req.Amount); err != nil {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, dto.SimpleResponse{Message: "Prepaid card paid successfully"})
+		return
+	}
+
+	for _, member := range req.MembersInvolved {
+		if err := api.prepaidRepo.RequestPrepaidCardPay(member.UserID, req.ID, member.PayRequested); err != nil {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, dto.SimpleResponse{Message: "Prepaid card requested successfully"})
+}

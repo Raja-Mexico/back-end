@@ -140,3 +140,15 @@ type UpdatePrepaidRequest struct {
 	IdentityNumber string  `json:"identity_number" binding:"required"`
 	Amount         float64 `json:"amount" binding:"required"`
 }
+
+type PayPrepaidRequest struct {
+	ID              int              `json:"id" binding:"required"`
+	IdentityNumber  string           `json:"identity_number" binding:"required"`
+	Amount          float64          `json:"amount" binding:"required"`
+	MembersInvolved []MemberInvolved `json:"members_involved" binding:"required"`
+}
+
+type MemberInvolved struct {
+	UserID       int     `json:"user_id"`
+	PayRequested float64 `json:"pay_requested"`
+}
