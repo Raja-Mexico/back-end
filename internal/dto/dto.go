@@ -124,3 +124,12 @@ type CreatePrepaidRequest struct {
 	IdentityNumber string  `json:"identity_number" binding:"required"`
 	Amount         float64 `json:"amount" binding:"required"`
 }
+
+type PrepaidCardResponse struct {
+	ID          int     `json:"id"`
+	Title       string  `json:"title"`
+	ServiceID   int     `json:"service_id"`
+	StatusID    int     `json:"status_id"`
+	DeadlineDay int     `json:"due_in_days"`
+	Amount      float64 `json:"amount"`
+}
