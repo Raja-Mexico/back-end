@@ -65,3 +65,19 @@ func (api *API) getPrepaidCard(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (api *API) updatePrepaidCard(c *gin.Context) {
+	var req dto.UpdatePrepaidRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	if err := api.prepaidRepo.UpdatePrepaidByID(req.ID, req.DeadlineDay, req.IdentityNumber, req.Amount); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SimpleResponse{Message: "Prepaid card updated successfully"})
+}

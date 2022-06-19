@@ -52,6 +52,7 @@ func NewAPI(
 		{
 			routerPrepaid.POST("/", api.savePrepaidCard)
 			routerPrepaid.GET("/", api.getPrepaidCard)
+			routerPrepaid.PATCH("/", api.updatePrepaidCard)
 		}
 
 		routerBrick := router.Group("/api/brick")

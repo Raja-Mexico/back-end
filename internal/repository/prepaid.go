@@ -79,3 +79,18 @@ func (p *PrepaidRepository) GetPrepaidCardByUserID(userID int) ([]PrepaidCard, e
 	return prepaidCards, nil
 
 }
+
+func (p *PrepaidRepository) UpdatePrepaidByID(
+	id int, deadlineDay int, destinationNumber string, nominal float64) error {
+	statement := `
+		UPDATE prepaid_card SET deadline_day = ?, destination_number = ?, nominal = ?
+		WHERE id = ?;
+	`
+	_, err := p.db.Exec(statement, deadlineDay, destinationNumber, nominal, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

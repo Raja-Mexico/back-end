@@ -133,3 +133,10 @@ type PrepaidCardResponse struct {
 	DeadlineDay int     `json:"due_in_days"`
 	Amount      float64 `json:"amount"`
 }
+
+type UpdatePrepaidRequest struct {
+	ID             int     `json:"id" binding:"required"`
+	DeadlineDay    int     `json:"deadline_day" binding:"required"`
+	IdentityNumber string  `json:"identity_number" binding:"required"`
+	Amount         float64 `json:"amount" binding:"required"`
+}
