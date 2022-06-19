@@ -76,6 +76,12 @@ func (api *API) getDetailTeam(c *gin.Context) {
 		return
 	}
 
+	teamName, err := api.teamRepo.GetTeamName(teamID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
+		return
+	}
+
 	members, err := api.teamRepo.GetMembers(teamID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
@@ -89,6 +95,7 @@ func (api *API) getDetailTeam(c *gin.Context) {
 	}
 
 	var response dto.DetailTeamResponse
+	response.FamilyName = teamName
 	response.FamilyCode = teamID
 	response.FamilyBalance = familyBalance
 	for _, member := range members {

@@ -89,6 +89,7 @@ type JoinTeamResponse struct {
 }
 
 type DetailTeamResponse struct {
+	FamilyName    string               `json:"family_name"`
 	FamilyCode    string               `json:"family_code"`
 	FamilyBalance float64              `json:"family_balance"`
 	Members       []TeamMemberResponse `json:"members"`
