@@ -24,7 +24,20 @@ func NewTeamRepository(db *sql.DB) *TeamRepository {
 }
 
 func (t *TeamRepository) CreateTeam(name string, userID int) (string, error) {
-	teamID := uuid.New().String()
+	teamID := uuid.New().String()[:8]
+
+	for {
+		isExist, err := t.CheckTeamExists(teamID)
+		if err != nil {
+			return "", err
+		}
+
+		if !isExist {
+			break
+		}
+
+		teamID = uuid.New().String()[:8]
+	}
 
 	var balance float64
 	statement := `SELECT balance FROM user_balance WHERE user_id = ?;`
