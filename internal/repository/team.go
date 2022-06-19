@@ -181,7 +181,7 @@ func (t *TeamRepository) GetTeamName(teamID string) (string, error) {
 	var name string
 	err := t.db.QueryRow(statement, teamID).Scan(&name)
 	if err != nil {
-		return "", err
+		return "", nil
 	}
 
 	return name, nil
