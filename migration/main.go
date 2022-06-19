@@ -15,6 +15,7 @@ func main() {
 	defer db.Close()
 
 	migrate(db)
+	seed(db)
 }
 
 func migrate(db *sql.DB) {
@@ -72,6 +73,62 @@ func migrate(db *sql.DB) {
 			FOREIGN KEY(user_balance_id) REFERENCES user_balance(id),
 			FOREIGN KEY(user_id) REFERENCES users(id)
 		);
+		
+		CREATE TABLE IF NOT EXISTS service (
+			id SMALLINT PRIMARY KEY,
+			name VARCHAR(255) not null
+		);
+
+		CREATE TABLE IF NOT EXISTS status (
+			id SMALLINT PRIMARY KEY,
+			name VARCHAR(255) not null
+		);
+
+		CREATE TABLE IF NOT EXISTS prepaid_card (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			creator_id INTEGER not null,
+			service_id INTEGER not null,
+			team_id varchar(255) not null,
+			user_involved_id INTEGER not null,
+			title VARCHAR(255) not null,
+			automatically_day INTEGER not null,
+			is_automated BOOLEAN not null default false,
+			nominal BIGINT not null,
+			destination_number INTEGER not null,
+			status_id SMALLINT not null,
+			FOREIGN KEY(creator_id) REFERENCES users(id),
+			FOREIGN KEY(service_id) REFERENCES service(id),
+			FOREIGN KEY(team_id) REFERENCES team(id),
+			FOREIGN KEY(user_involved_id) REFERENCES users(id),
+			FOREIGN KEY(status_id) REFERENCES status(id)
+		);
+
+		CREATE TABLE IF NOT EXISTS manage_prepaid_card (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			prepaid_card_id INTEGER not null,
+			user_id INTEGER not null,
+			is_confirmated BOOLEAN not null default false,
+			FOREIGN KEY(prepaid_card_id) REFERENCES prepaid_card(id),
+			FOREIGN KEY(user_id) REFERENCES users(id)
+		);
+	`)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func seed(db *sql.DB) {
+	_, err := db.Exec(`
+		INSERT INTO service (id, name) VALUES 
+		(0, 'PLN'),
+		(1, 'Pulsa');
+
+		INSERT INTO status (id, name) VALUES
+		(0, 'Menunggu Pembayaran'),
+		(1, 'Sudah Dibayar'),
+		(2, 'Menunggu Persetujuan Pembayaran Bersama'),
+		(3, 'Menunggu Konfirmasi (withdraw)');
 	`)
 
 	if err != nil {
