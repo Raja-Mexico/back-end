@@ -77,3 +77,11 @@ type CreateTeamResponse struct {
 	Message    string `json:"message"`
 	FamilyCode string `json:"family_code"`
 }
+
+type JoinTeamRequest struct {
+	FamilyCode string `json:"family_code" binding:"required"`
+}
+
+type JoinTeamResponse struct {
+	Success bool `json:"success"`
+}
